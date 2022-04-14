@@ -15,19 +15,18 @@ class Save {
         return readNote('db/db.json', 'utf8');
     }
 
-    retrieveNotes() {
-        return this.read().then(notes => {
-            let parsedNotes;
-            try {
-                parsedNotes = [].concat(JSON.parse(notes));
-            } catch (err) {
-                parsedNotes = [];
-            }
-            return parsedNotes;
-        });
+    async retrieveNotes() {
+        const notes = await this.read();
+        let parsedNotes;
+        try {
+            parsedNotes = [].concat(JSON.parse(notes));
+        } catch (err) {
+            parsedNotes = [];
+        }
+        return parsedNotes;
     }
 
-    addNote(note) {
+    async addNote(note) {
         const { title, text } = note;
         if (!title || !text) {
             throw new Error('Both title and text can not be blank');
@@ -36,10 +35,10 @@ class Save {
         const newNote = { title, text, id: uuidv4() };
 
         // Retrieve Notes, add the new note, update notes
-        return this.retrieveNotes()
-            .then(notes => [...notes, newNote])
-            .then(updatedNotes => this.write(updatedNotes))
-            .then(() => newNote);
+        const notes = await this.retrieveNotes();
+        const updatedNotes = [...notes, newNote];
+        await this.write(updatedNotes);
+        return newNote;
     }
 }
 
